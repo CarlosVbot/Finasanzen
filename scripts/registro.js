@@ -11,7 +11,7 @@ document.getElementById("formRegistro").addEventListener("submit", async functio
     }
 
     try {
-        const response = await fetch("http://localhost:8000/api/auth/register", {
+        const response = await fetch("https://sdr-cone-v1.onrender.com/api/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

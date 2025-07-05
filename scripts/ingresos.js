@@ -8,7 +8,7 @@ document.getElementById("formIngreso").addEventListener("submit", async function
     const periodo = parseInt(document.getElementById("periodo").value);
 
     try {
-        const response = await fetch("http://localhost:8000/api/ingresos/create", {
+        const response = await fetch("https://sdr-cone-v1.onrender.com/api/ingresos/create", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,

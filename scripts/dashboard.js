@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             console.log("Token:", token);
             const [resIngresos, resGastos] = await Promise.all([
-                fetch('http://localhost:8000/api/ingresos/consult', {
+                fetch('https://sdr-cone-v1.onrender.com/api/ingresos/consult', {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({ user: { id: Number(userId) } })
                 }),
-                fetch('http://localhost:8000/api/gastos/consult', {
+                fetch('https://sdr-cone-v1.onrender.com/api/gastos/consult', {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,
