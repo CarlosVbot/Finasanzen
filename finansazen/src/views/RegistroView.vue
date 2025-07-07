@@ -51,50 +51,54 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
-import {useRouter} from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const nombre = ref('')
 const email = ref('')
 const password = ref('')
 const confirmacion = ref('')
 const cargando = ref(false)
-
 const router = useRouter()
 const API_URL = import.meta.env.VITE_API_URL
 
 const registrarse = async () => {
   if (password.value !== confirmacion.value) {
-    alert('Las contraseñas no coinciden.')
+    Swal.fire('Error', 'Las contraseñas no coinciden', 'error')
     return
   }
 
   cargando.value = true
-
   try {
-    const res = await fetch(`${API_URL}/api/auth/register`, {
+    const res = await fetch(`${API_URL}/api/usuarios/create`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username: nombre.value, email: email.value, password: password.value})
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: nombre.value,
+        email: email.value,
+        password: password.value
+      })
     })
 
     const data = await res.json()
 
     if (res.ok) {
-      sessionStorage.setItem('token', data.token)
-      sessionStorage.setItem('userId', data.userID)
-      router.push('/dashboard')
+      Swal.fire('Registro exitoso', 'Ahora puedes iniciar sesión', 'success')
+      router.push('/login')
     } else {
-      alert(data.message || 'No se pudo registrar')
+      Swal.fire('Error', data.message || 'No se pudo registrar', 'error')
     }
-  } catch (err) {
-    console.error(err)
-    alert('Error de conexión')
+  } catch (error) {
+    Swal.fire('Error', 'Hubo un problema de conexión', 'error')
   } finally {
     cargando.value = false
   }
 }
 </script>
+
 <style scoped>
 .container {
   min-height: 70vh;
