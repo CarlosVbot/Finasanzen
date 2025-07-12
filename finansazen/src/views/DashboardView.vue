@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapper" class="dashboard-wrapper fade-in">
     <header class="dashboard-header">
-      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo">
       <p><b>Análisis financiero personal</b></p>
     </header>
 
@@ -65,17 +65,21 @@
       </section>
 
       <section class="my-4">
-        <div class="row">
-          <div class="col-md-4">
-            <canvas id="horizontalBarChart"></canvas>
+        <div class="row graficas-container">
+          <div class="col-md-4 col-12">
+            <div class="grafica-wrapper">
+              <canvas id="horizontalBarChart"></canvas>
+            </div>
           </div>
-
-          <div class="col-md-4">
-            <canvas ref="graficaCanvas"></canvas>
+          <div class="col-md-4 col-12">
+            <div class="grafica-wrapper">
+              <canvas ref="graficaCanvas"></canvas>
+            </div>
           </div>
-
-          <div class="col-md-4">
-            <canvas id="lineChart"></canvas>
+          <div class="col-md-4 col-12">
+            <div class="grafica-wrapper">
+              <canvas id="lineChart"></canvas>
+            </div>
           </div>
         </div>
       </section>

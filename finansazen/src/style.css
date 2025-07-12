@@ -75,5 +75,31 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }.dashboard-header {
+     padding: 1.5rem 0; /* Reducir padding en móviles */
+   }
+
+  .logo {
+    width: auto;
+    height: 60px; /* Tamaño base */
+    max-width: 100%; /* Evitar desbordamiento */
   }
+
+  /* Ajustes para pantallas pequeñas */
+  @media (max-width: 768px) {
+    .logo {
+      height: 40px;
+    }
+    .dashboard-header {
+      padding: 1rem 0;
+    }
+  }
+
+  /* Pantallas muy grandes */
+  @media (min-width: 1200px) {
+    .logo {
+      height: 80px;
+    }
+  }
+
 }
