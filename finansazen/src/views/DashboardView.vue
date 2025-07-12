@@ -1,8 +1,8 @@
 <template>
   <div ref="wrapper" class="dashboard-wrapper fade-in">
     <header class="dashboard-header">
-      <h1>Finansazen</h1>
-      <p>Análisis financiero personal</p>
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <p><b>Análisis financiero personal</b></p>
     </header>
 
     <main class="dashboard-main container">
@@ -42,6 +42,7 @@
           <tr>
             <th>Descripción</th>
             <th>Monto</th>
+            <th>Frecuencia</th>
             <th>Categoría</th>
             <th>Acciones</th>
           </tr>
@@ -52,7 +53,8 @@
             <td :class="item.tipo === 'ingreso' ? 'text-success' : 'text-danger'">
               {{ item.tipo === 'ingreso' ? '+' : '-' }}${{ item.monto }}
             </td>
-            <td>{{ item.categoria }}</td>
+            <td>{{ mapaValores(item.periodo)  }}</td>
+            <td>{{ mapaCategoria(item.tipo, item.categoria )  }}</td>
             <td>
               <button class="btn-icono editar" @click="editarRegistro(item)">✏️</button>
               <button class="btn-icono eliminar" @click="eliminarRegistro(item)">🗑️</button>
@@ -62,11 +64,52 @@
         </table>
       </section>
 
-      <section class="dashboard-grafico">
-        <canvas   ref="graficaCanvas"></canvas>
+      <section class="my-4">
+        <div class="row">
+          <div class="col-md-4">
+            <canvas id="horizontalBarChart"></canvas>
+          </div>
+
+          <div class="col-md-4">
+            <canvas ref="graficaCanvas"></canvas>
+          </div>
+
+          <div class="col-md-4">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
       </section>
       <section class="modelo-financiero">
         <h3>Evaluación del modelo 50/30/20</h3>
+        <div class="intro-modelo mb-3">
+          <p>
+            El modelo <strong>50/30/20</strong> es una guía para distribuir tus ingresos:
+            <strong>50%</strong> en necesidades y obligaciones (como renta y servicios),
+            <strong>30%</strong> en ocio o estilo de vida (como entretenimiento),
+            y <strong>20%</strong> en ahorro o inversión para el futuro.
+          </p>
+          <p>
+            Seguir esta regla te ayuda a mejorar tu salud financiera, evitar deudas innecesarias
+            y construir estabilidad a largo plazo.
+          </p>
+        </div>
+        <div class="alert alert-success" v-if="!desbalance">
+          {{ comentarioModelo }}
+        </div>
+        <div class="alert alert-danger" v-else>
+          {{ comentarioModelo }}
+        </div>
+        <div class="barra-financiera mt-3">
+          <div class="barra-porcentaje barra-roja" :style="{ width: porcentajeFijos + '%' }" title="Fijos">
+            {{ porcentajeFijos.toFixed(0) }}%
+          </div>
+          <div class="barra-porcentaje barra-amarilla" :style="{ width: porcentajeOcio + '%' }" title="Ocio">
+            {{ porcentajeOcio.toFixed(0) }}%
+          </div>
+          <div class="barra-porcentaje barra-verde" :style="{ width: porcentajeAhorro + '%' }" title="Ahorro">
+            {{ porcentajeAhorro.toFixed(0) }}%
+          </div>
+        </div>
         <div class="resumen-distribucion">
           <p><strong>Fijos y créditos (50%):</strong> {{ porcentajeFijos.toFixed(2) }}%</p>
           <p><strong>Ocio (30%):</strong> {{ porcentajeOcio.toFixed(2) }}%</p>
@@ -74,11 +117,69 @@
         </div>
         <p class="comentario-modelo">{{ comentarioModelo }}</p>
       </section>
-      <section class="resumen-diario">
-        <h3>Ingreso Diario vs Gasto Diario</h3>
-        <p><strong>Ingreso diario:</strong> ${{ ingresoDiario.toFixed(2) }}</p>
-        <p><strong>Gasto diario (fijo + ocio):</strong> ${{ gastoDiario.toFixed(2) }}</p>
-        <p><strong>Diferencia disponible:</strong> ${{ (ingresoDiario - gastoDiario).toFixed(2) }}</p>
+      <section class="resumen-diario card-financiera">
+        <div class="header-seccion">
+          <h3><i class="icono icono-grafico"></i> Análisis Diario</h3>
+          <p class="subtitulo">Tu panorama financiero diario</p>
+        </div>
+
+        <div class="metricas-container">
+
+          <div class="metrica-card ingreso">
+            <div class="metrica-header">
+              <i class="icono icono-ingreso"></i>
+              <h4>Ingreso Diario</h4>
+            </div>
+            <p class="valor">${{ ingresoDiario.toFixed(2) }}</p>
+            <p class="meta" v-if="ingresoDiario > 0">
+        <span :class="{'text-success': porcentajeAhorro >= 20, 'text-warning': porcentajeAhorro < 20}">
+          {{ porcentajeAhorro.toFixed(1) }}% destinado a ahorros
+        </span>
+            </p>
+          </div>
+
+          <div class="metrica-card gasto">
+            <div class="metrica-header">
+              <i class="icono icono-gasto"></i>
+              <h4>Gasto Diario</h4>
+            </div>
+            <p class="valor">${{ gastoDiario.toFixed(2) }}</p>
+            <div class="desglose">
+              <span class="badge badge-fijo">Fijos: ${{ (gastoDiario * porcentajeFijos/100).toFixed(2) }}</span>
+              <span class="badge badge-ocio">Ocio: ${{ (gastoDiario * porcentajeOcio/100).toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <div class="metrica-card balance" :class="{'positivo': (ingresoDiario - gastoDiario) >= 0, 'negativo': (ingresoDiario - gastoDiario) < 0}">
+            <div class="metrica-header">
+              <i class="icono" :class="{'icono-mas': (ingresoDiario - gastoDiario) >= 0, 'icono-menos': (ingresoDiario - gastoDiario) < 0}"></i>
+              <h4>Balance Diario</h4>
+            </div>
+            <p class="valor">${{ Math.abs(ingresoDiario - gastoDiario).toFixed(2) }}</p>
+            <p class="mensaje-balance">
+        <span v-if="(ingresoDiario - gastoDiario) >= 0">
+          ¡Buen trabajo! Estás dentro de tu presupuesto.
+        </span>
+              <span v-else>
+          Alerta: Estás gastando ${{ (gastoDiario - ingresoDiario).toFixed(2) }} más de lo que ganas diariamente.
+        </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="recomendacion" :class="{'recomendacion-positiva': (ingresoDiario - gastoDiario) >= 0, 'recomendacion-alerta': (ingresoDiario - gastoDiario) < 0}">
+          <h5><i class="icono icono-idea"></i> Recomendación</h5>
+          <p v-if="(ingresoDiario - gastoDiario) >= 0">
+            Puedes ahorrar ${{ ((ingresoDiario - gastoDiario) * 30).toFixed(2) }} este mes.
+            Considera invertir el {{ ((ingresoDiario - gastoDiario)/ingresoDiario * 100).toFixed(1) }}% adicional.
+          </p>
+          <p v-else>
+            Para equilibrar tus finanzas, reduce gastos en
+            <span v-if="porcentajeOcio > 30">ocio (actual {{ porcentajeOcio.toFixed(1) }}%)</span>
+            <span v-if="porcentajeOcio > 30 && porcentajeFijos > 50">y </span>
+            <span v-if="porcentajeFijos > 50">necesidades fijas (actual {{ porcentajeFijos.toFixed(1) }}%)</span>.
+          </p>
+        </div>
       </section>
     </main>
 
@@ -105,7 +206,12 @@ const totalIngresos = ref(0)
 const totalGastos = ref(0)
 const balance = ref(0)
 const graficaCanvas = ref(null)
+let sugerencia = ref('')
+const gastosUnicos = ref(0)
+let desbalance = ref(false)
 const grafica = ref(null)
+let horizontalBarChart = null
+let lineChart = null
 
 const factores = { diario: 1, quincenal: 15, mensual: 30, anual: 365, semanal: 7 }
 
@@ -147,47 +253,101 @@ const porcentajeFijos = ref(0)
 const porcentajeOcio = ref(0)
 const porcentajeAhorro = ref(0)
 const comentarioModelo = ref('')
+const porcentajeUnicos = ref(0)
 const ingresoDiario = ref(0)
 const gastoDiario = ref(0)
+
 const periodoBase = {
   1: 1,
   2: 7,
   3: 15,
   4: 30,
-  5: 365
+  5: 365,
+  6: 1 //unico
 }
 const calcularModeloFinanciero = () => {
-  const totalIngresosDiarios = ingresos.value.reduce((acc, i) => acc + i.monto / periodoBase[i.periodo], 0)
-  let fijos = 0, ocio = 0, ahorro = 0
+  desbalance.value = false;
+  comentarioModelo.value = '';
+
+  const totalIngresosDiarios = ingresos.value.reduce((acc, i) => acc + i.monto / periodoBase[i.periodo], 0);
+
+  let fijos = 0, ocio = 0, unicos = 0;
 
   gastos.value.forEach(g => {
-    const monto = g.monto / periodoBase[g.periodo]
-    if (g.categoria === 1 || g.categoria === 3) fijos += monto
-    if (g.categoria === 2) ocio += monto
-  })
+    const monto = g.monto / periodoBase[g.periodo];
+    if (g.periodo === 6) {
+      unicos += monto;
+    } else {
+      if (g.categoria === 1 || g.categoria === 3) fijos += monto;
+      if (g.categoria === 2) ocio += monto;
+    }
+  });
 
-  ingresos.value.forEach(i => {
-    const monto = i.monto / periodoBase[i.periodo]
-    ahorro += monto
-  })
+  const totalGastos = fijos + ocio + unicos;
+  const ahorroReal = totalIngresosDiarios - totalGastos;
 
-  const total = fijos + ocio + ahorro || 1
-  porcentajeFijos.value = (fijos / totalIngresosDiarios) * 100
-  porcentajeOcio.value = (ocio / totalIngresosDiarios) * 100
-  porcentajeAhorro.value = (ahorro / totalIngresosDiarios) * 100 - (porcentajeFijos.value + porcentajeOcio.value)
+  if (totalIngresosDiarios > 0) {
+    porcentajeFijos.value = (fijos / totalIngresosDiarios) * 100;
+    porcentajeOcio.value = (ocio / totalIngresosDiarios) * 100;
+    porcentajeUnicos.value = (unicos / totalIngresosDiarios) * 100;
 
-  const desbalance = porcentajeFijos.value + porcentajeOcio.value > 100
-  comentarioModelo.value = desbalance
-      ? 'Estás gastando más de lo que ingresas. Ajusta tus gastos fijos y de ocio.'
-      : `Distribución actual: ${porcentajeFijos.value.toFixed(1)}% fijos, ${porcentajeOcio.value.toFixed(1)}% ocio, ${porcentajeAhorro.value.toFixed(1)}% ahorro.`
+    porcentajeAhorro.value = (ahorroReal / totalIngresosDiarios) * 100;
+  } else {
+    porcentajeFijos.value = 0;
+    porcentajeOcio.value = 0;
+    porcentajeAhorro.value = 0;
+    porcentajeUnicos.value = 0;
+  }
 
-  ingresoDiario.value = totalIngresosDiarios
-  gastoDiario.value = fijos + ocio
+  if(porcentajeFijos.value > 50) {
+    desbalance.value = true;
+    comentarioModelo.value += `Estás gastando ${porcentajeFijos.value.toFixed(2)}% en fijos (recomendado ≤50%). `;
+  }
+
+  if(porcentajeOcio.value > 30) {
+    desbalance.value = true;
+    comentarioModelo.value += `Estás gastando ${porcentajeOcio.value.toFixed(2)}% en ocio (recomendado ≤30%). `;
+  }
+
+  if(ahorroReal < 0) {
+    desbalance.value = true;
+    const deficit = Math.abs(ahorroReal);
+    comentarioModelo.value += `Tienes un déficit diario de $${deficit.toFixed(2)} (gastas más de lo que ganas). `;
+  } else if(porcentajeAhorro.value < 20) {
+    desbalance.value = true;
+    const faltante = (totalIngresosDiarios * 0.2) - ahorroReal;
+    comentarioModelo.value += `Te faltan $${faltante.toFixed(2)} diarios para alcanzar el 20% de ahorro. `;
+  }
+
+  if(!desbalance.value) {
+    comentarioModelo.value = '¡Excelente! Estás siguiendo el modelo 50/30/20 correctamente.';
+  } else {
+    comentarioModelo.value += 'Revisa tus gastos para mejorar tu salud financiera.';
+  }
+
+  ingresoDiario.value = totalIngresosDiarios;
+  gastoDiario.value = totalGastos;
+  gastosUnicos.value = unicos;
+
+  sugerencia.value = `Para el modelo 50/30/20 ideal:
+    - Máximo $${(totalIngresosDiarios * 0.5).toFixed(2)} diarios en fijos
+    - Máximo $${(totalIngresosDiarios * 0.3).toFixed(2)} diarios en ocio
+    - Mínimo $${(totalIngresosDiarios * 0.2).toFixed(2)} diarios en ahorro`;
 }
 const calcularTotales = () => {
   const factor = factores[vistaSeleccionada.value]
-  totalIngresos.value = ingresos.value.reduce((s, i) => s + parseFloat(i.monto) / periodoBase[i.periodo] * factor, 0).toFixed(2)
-  totalGastos.value = gastos.value.reduce((s, g) => s + parseFloat(g.monto) / periodoBase[g.periodo] * factor, 0).toFixed(2)
+  let ingresosUnicos = ingresos.value.filter(i => i.periodo === 6)
+  let ingresosFiltradosUnicos = ingresos.value.filter(i => i.periodo !== 6)
+  totalIngresos.value = ingresosFiltradosUnicos.reduce((s, i) => s + parseFloat(i.monto) / periodoBase[i.periodo] * factor, 0).toFixed(2)
+  if (ingresosUnicos.length > 0) {
+    totalIngresos.value = (parseFloat(totalIngresos.value) + ingresosUnicos.reduce((s, i) => s + parseFloat(i.monto), 0)).toFixed(2)
+  }
+  let gastosFiltradosUnicos = gastos.value.filter(g => g.periodo !== 6)
+  let gastosUnicos = gastos.value.filter(g => g.periodo === 6)
+  totalGastos.value = gastosFiltradosUnicos.reduce((s, g) => s + parseFloat(g.monto) / periodoBase[g.periodo] * factor, 0).toFixed(2)
+  if (gastosUnicos.length > 0) {
+    totalGastos.value = (parseFloat(totalGastos.value) + gastosUnicos.reduce((s, g) => s + parseFloat(g.monto), 0)).toFixed(2)
+  }
   balance.value = (totalIngresos.value - totalGastos.value).toFixed(2)
   calcularModeloFinanciero()
   renderGrafica()
@@ -195,19 +355,27 @@ const calcularTotales = () => {
 
 const renderGrafica = async () => {
   await nextTick()
+
   if (grafica.value) grafica.value.destroy()
+  if (horizontalBarChart) horizontalBarChart.destroy()
+  if (lineChart) lineChart.destroy()
+  const chartData = {
+    labels: ['Ingresos', 'Gastos'],
+    datasets: [{
+      label: 'Distribución',
+      data: [totalIngresos.value, totalGastos.value],
+      backgroundColor: ['#00a86b', '#e74c3c'],
+      borderColor: ['#fff', '#fff'],
+      borderWidth: 1
+    }]
+  }
+
   grafica.value = new Chart(graficaCanvas.value, {
     type: 'pie',
-    data: {
-      labels: ['Ingresos', 'Gastos'],
-      datasets: [{
-        label: 'Distribución',
-        data: [totalIngresos.value, totalGastos.value],
-        backgroundColor: ['#00a86b', '#e74c3c']
-      }]
-    },
+    data: chartData,
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         tooltip: {
           callbacks: {
@@ -220,8 +388,60 @@ const renderGrafica = async () => {
       }
     }
   })
-}
 
+  horizontalBarChart = new Chart(
+      document.getElementById('horizontalBarChart').getContext('2d'),
+      {
+        type: 'bar',
+        data: chartData,
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          scales: {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.label}: $${ctx.parsed.toFixed(2)}`
+              }
+            },
+            legend: { display: false }
+          }
+        }
+      }
+  )
+
+  lineChart = new Chart(
+      document.getElementById('lineChart').getContext('2d'),
+      {
+        type: 'line',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            ...chartData.datasets[0],
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.label}: $${ctx.parsed.toFixed(2)}`
+              }
+            },
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      }
+  )
+}
 const editarRegistro = (item) => {
   router.push(`/${item.tipo}/${item.id}`)
 }
@@ -248,6 +468,37 @@ const eliminarRegistro = async (item) => {
   }
 }
 
+const mapaValores = (valor) => {
+  const mapa = {
+    1: 'Diario',
+    2: 'Semanal',
+    3: 'Quincenal',
+    4: 'Mensual',
+    5: 'Anual',
+    6: 'Único'
+  };
+  return mapa[valor] || 'Desconocido';
+}
+
+const mapaCategoria = (tipo,valor) => {
+  if( tipo === 'ingreso') {
+    const mapa = {
+      1: 'Ingreso',
+      2: 'Ahorro',
+      3: 'Inversiones',
+      4: 'Otros'
+    };
+    return mapa[valor] || 'Desconocido';
+  }else{
+    const mapa = {
+      1: 'Gasto fijo',
+      2: 'Gastos de ocio'
+    };
+    return mapa[valor] || 'Desconocido';
+  }
+
+}
+
 const cerrarSesion = () => {
   Swal.fire({
     title: '¿Cerrar sesión?',
@@ -265,6 +516,7 @@ const cerrarSesion = () => {
     }
   })
 }
+
 </script>
 <style scoped>
 .dashboard-wrapper {
@@ -489,4 +741,166 @@ const cerrarSesion = () => {
   color: #007f5f;
   text-align: center;
 }
+
+.barra-roja { background-color: #dc2540; }
+.barra-amarilla { background-color: #ffc107; }
+.barra-verde { background-color: #28a745; }
+
+.barra-financiera {
+  display: flex;
+  height: 30px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #676262;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.col-md-4 {
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 127, 95, 0.1);
+  padding: 15px;
+}
+.card-financiera {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 127, 95, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.header-seccion {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.header-seccion h3 {
+  color: #1b4332;
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.subtitulo {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.metricas-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.metrica-card {
+  padding: 1.25rem;
+  border-radius: 10px;
+  background: #f8f9fa;
+  transition: transform 0.3s ease;
+}
+
+.metrica-card:hover {
+  transform: translateY(-5px);
+}
+
+.metrica-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.metrica-header h4 {
+  margin-left: 10px;
+  font-size: 1.1rem;
+  color: #495057;
+}
+
+.metrica-card .valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.ingreso .valor { color: #00a86b; }
+.gasto .valor { color: #e74c3c; }
+.balance.positivo .valor { color: #28a745; }
+.balance.negativo .valor { color: #dc3545; }
+
+.desglose {
+  margin-top: 0.75rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+}
+
+.badge-fijo {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.badge-ocio {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.mensaje-balance {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.recomendacion {
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.recomendacion-positiva {
+  background: rgba(40, 167, 69, 0.1);
+  border-left-color: #28a745;
+}
+
+.recomendacion-alerta {
+  background: rgba(220, 53, 69, 0.1);
+  border-left-color: #dc3545;
+}
+
+.recomendacion h5 {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.recomendacion h5 i {
+  margin-right: 8px;
+}
+
+.icono {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+}
+
+.icono-grafico { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
+.icono-ingreso { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div  ref="wrapper" class="page-wrapper">
     <header>
-      <h1>Finansazen</h1>
-      <p>Accede a tu espacio financiero</p>
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <p><b>Accede a tu espacio financiero</b></p>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     </header>
 

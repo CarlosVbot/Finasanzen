@@ -1,8 +1,8 @@
 <template>
   <div class="page-wrapper fade-in">
     <header class="dashboard-header">
-      <h1>Editar Ingreso</h1>
-      <p>Modifica los detalles de tu ingreso</p>
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <p><b>Agrega o modifica los detalles de tu ingreso</b></p>
     </header>
 
     <main class="container d-flex justify-content-center align-items-center">
@@ -35,6 +35,7 @@
               <option :value="3">Quincenal</option>
               <option :value="4">Mensual</option>
               <option :value="5">Anual</option>
+              <option :value="6">Unico</option>
             </select>
           </div>
 

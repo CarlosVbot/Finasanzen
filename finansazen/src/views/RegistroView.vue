@@ -1,8 +1,8 @@
 <template>
   <div class="page-wrapper fade-in">
     <header class="dashboard-header">
-      <h1>Finansazen</h1>
-      <p>Crea tu cuenta gratuita</p>
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <p><b>Crea tu cuenta gratuita</b></p>
     </header>
 
     <main class="container d-flex justify-content-center align-items-center">

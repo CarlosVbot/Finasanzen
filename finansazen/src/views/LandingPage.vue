@@ -1,8 +1,8 @@
 <template>
   <div :class="{ 'fade-out': isFading }">
     <header>
-      <h1>Finansazen</h1>
-      <p>La tranquilidad financiera comienza con claridad</p>
+      <img src="../assets/img/logo.png" alt="Finansazen Logo" class="logo"  height="15%" width="15%" />
+      <p><b>La tranquilidad financiera comienza con claridad</b></p>
     </header>
 
     <main class="container hero">
