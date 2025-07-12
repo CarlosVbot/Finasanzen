@@ -82,7 +82,7 @@ const registrarse = async () => {
     if (res.ok) {
       sessionStorage.setItem('token', data.token)
       sessionStorage.setItem('userId', data.userID)
-      router.push('/dashboard')
+      router.push('/login')
     } else {
       alert(data.message || 'No se pudo registrar')
     }
