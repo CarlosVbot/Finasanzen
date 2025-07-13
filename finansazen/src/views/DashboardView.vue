@@ -64,22 +64,16 @@
         </table>
       </section>
 
-      <section class="my-4">
-        <div class="row graficas-container">
-          <div class="col-md-4 col-12">
-            <div class="grafica-wrapper">
-              <canvas id="horizontalBarChart"></canvas>
-            </div>
+      <section class="graficas-section">
+        <div class="graficas-container">
+          <div class="grafica-item">
+            <canvas id="horizontalBarChart"></canvas>
           </div>
-          <div class="col-md-4 col-12">
-            <div class="grafica-wrapper">
-              <canvas ref="graficaCanvas"></canvas>
-            </div>
+          <div class="grafica-item">
+            <canvas ref="graficaCanvas"></canvas>
           </div>
-          <div class="col-md-4 col-12">
-            <div class="grafica-wrapper">
-              <canvas id="lineChart"></canvas>
-            </div>
+          <div class="grafica-item">
+            <canvas id="lineChart"></canvas>
           </div>
         </div>
       </section>
@@ -913,31 +907,36 @@ canvas {
   max-width: 100%;
 }
 
-@media (max-width: 768px) {
-  .logo {
-    height: 40px;
-  }
-  .dashboard-header {
-    padding: 1rem 0;
-  }
+.graficas-section {
+  margin: 2rem 0;
 }
 
-@media (min-width: 1200px) {
-  .logo {
-    height: 80px;
-  }
+.graficas-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grafica-item {
+  position: relative;
+  min-height: 300px;
+  width: 100%;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 768px) {
   .graficas-container {
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
-  .grafica-wrapper {
-    position: relative;
+  .grafica-item {
     min-height: 250px;
   }
-
-  canvas {
-    width: 100% !important;
-    height: 100% !important;
-  }
 }
+
 </style>
