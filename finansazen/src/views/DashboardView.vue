@@ -902,9 +902,8 @@ canvas {
 .icono-grafico { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
 .icono-ingreso { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
 .logo {
-  width: auto;
-  height: 60px;
-  max-width: 100%;
+  width: 30%;
+  height: 30%;
 }
 
 .graficas-section {
