@@ -926,5 +926,18 @@ canvas {
   .logo {
     height: 80px;
   }
+  .graficas-container {
+    gap: 1.5rem;
+  }
+
+  .grafica-wrapper {
+    position: relative;
+    min-height: 250px;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
 }
 </style>
