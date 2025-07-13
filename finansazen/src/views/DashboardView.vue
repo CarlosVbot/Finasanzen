@@ -907,4 +907,24 @@ canvas {
 
 .icono-grafico { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
 .icono-ingreso { background-image: url('data:image/svg+xml;utf8,<svg ...></svg>'); }
+.logo {
+  width: auto;
+  height: 60px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .logo {
+    height: 40px;
+  }
+  .dashboard-header {
+    padding: 1rem 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .logo {
+    height: 80px;
+  }
+}
 </style>
